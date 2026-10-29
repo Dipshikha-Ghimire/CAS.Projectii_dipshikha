@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CAS Prototype</title>
+<style>
+:root{--blue:#1e3a8a;--blue2:#2548b8;--teal:#0d9488;--amber:#d97706;--red:#dc2626;--green:#16a34a;--bg:#f4f6fa;--card:#fff;--line:#e5e9f0;--text:#1f2937;--muted:#6b7280;--soft:#eef2fb}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Segoe UI",system-ui,-apple-system,Arial,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.45}
+h1{font-size:22px;margin:0 0 4px}h2{font-size:17px;margin:0 0 12px}h3{font-size:15px;margin:0 0 8px}
+.muted{color:var(--muted)}.small{font-size:13px}
+.app{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
+.side{background:var(--blue);color:#fff;padding:18px 12px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column}
+.brand{font-weight:700;font-size:18px;padding:4px 10px 2px}.brand span{color:#5eead4}
+.tag{font-size:11px;color:#b9c6ee;padding:0 10px 16px}
+.nav a{display:flex;gap:10px;align-items:center;color:#dbe4ff;text-decoration:none;padding:10px 12px;border-radius:10px;margin-bottom:3px;cursor:pointer;font-size:14.5px}
+.nav a:hover{background:rgba(255,255,255,.1)}.nav a.on{background:#fff;color:var(--blue);font-weight:600}
+.proto{margin-top:auto;font-size:11px;color:#b9c6ee;padding:10px;border-top:1px solid rgba(255,255,255,.15)}
+.main{display:flex;flex-direction:column;min-width:0}
+.top{background:#fff;border-bottom:1px solid var(--line);padding:12px 24px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.who{display:flex;align-items:center;gap:10px;font-size:14px}
+.av{width:34px;height:34px;border-radius:50%;background:var(--teal);color:#fff;display:grid;place-items:center;font-weight:700}
+.page{padding:24px;max-width:1200px;width:100%}
+.grid{display:grid;gap:16px}.g4{grid-template-columns:repeat(4,1fr)}.g2{grid-template-columns:1.4fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.e2{grid-template-columns:1fr 1fr}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:0 1px 2px rgba(16,24,40,.04)}
+.stat .n{font-size:30px;font-weight:700;line-height:1.1}.stat .l{color:var(--muted);font-size:13px}
+.stat.red .n{color:var(--red)}.stat.amber .n{color:var(--amber)}.stat.green .n{color:var(--green)}.stat.blue .n{color:var(--blue2)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;color:var(--muted);font-weight:600;font-size:12.5px;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px;border-bottom:1px solid #f0f2f6;vertical-align:middle}
+tr.click{cursor:pointer}tr.click:hover td{background:#f8faff}
+.tw{overflow-x:auto}
+.badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600;white-space:nowrap}
+.b-red{background:#fee2e2;color:#b91c1c}.b-green{background:#dcfce7;color:#166534}.b-amber{background:#fef3c7;color:#92400e}.b-blue{background:#e0e9ff;color:#1e3a8a}.b-gray{background:#eceff3;color:#4b5563}
+.btn{border:0;background:var(--blue2);color:#fff;padding:9px 16px;border-radius:10px;font-size:14px;cursor:pointer;font-weight:600}
+.btn:hover{background:var(--blue)}.btn.sec{background:#fff;color:var(--blue2);border:1px solid #c9d5f5}.btn.sec:hover{background:var(--soft)}
+.btn.sm{padding:5px 12px;font-size:13px}.btn.teal{background:var(--teal)}
+input,select,textarea{font:inherit;padding:9px 11px;border:1px solid #cdd5e1;border-radius:9px;background:#fff;width:100%}
+input:focus,select:focus,textarea:focus{outline:2px solid #bcd0ff;border-color:var(--blue2)}
+label{font-size:13px;font-weight:600;display:block;margin-bottom:4px;color:#374151}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}.row>div{flex:1;min-width:150px}
+.bar{height:10px;border-radius:6px;background:#e8ecf3;overflow:hidden}.bar i{display:block;height:100%;background:var(--teal)}
+.chart{width:100%;height:auto}.ax{font-size:11px;fill:#6b7280}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:#4b5563;margin-top:6px}
+.legend i{display:inline-block;width:18px;height:0;border-top:3px solid;vertical-align:middle;margin-right:6px}
+.note{background:#eef6ff;border:1px solid #cfe2ff;border-radius:12px;padding:12px 14px;font-size:14px}
+.warn{background:#fff4f4;border:1px solid #fecaca;border-radius:12px;padding:12px 14px}
+.chip{display:inline-block;background:var(--soft);color:var(--blue);padding:4px 11px;border-radius:99px;font-size:13px;margin:0 6px 6px 0}
+.pagehead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.big{font-size:44px;font-weight:700}
+.toast{position:fixed;bottom:24px;right:24px;background:#111827;color:#fff;padding:12px 18px;border-radius:12px;z-index:50;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:340px}
+.modalbg{position:fixed;inset:0;background:rgba(17,24,39,.45);display:grid;place-items:center;z-index:40;padding:16px}
+.modal{background:#fff;border-radius:16px;padding:22px;max-width:560px;width:100%;max-height:85vh;overflow:auto}
+.tl{border-left:3px solid var(--line);padding-left:14px;margin-left:4px}.tl div{margin-bottom:12px;position:relative}
+.tl div:before{content:"";position:absolute;left:-21px;top:5px;width:10px;height:10px;border-radius:50%;background:var(--teal)}
+.login{min-height:100vh;display:grid;grid-template-columns:1fr 1fr}
+.lbrand{background:linear-gradient(160deg,var(--blue),#14296b);color:#fff;padding:60px;display:flex;flex-direction:column;justify-content:center}
+.lbrand h1{font-size:34px}.lbrand li{margin:14px 0;font-size:17px}
+.lform{display:grid;place-items:center;padding:24px}.lcard{max-width:380px;width:100%}
+.roles{display:flex;gap:8px;margin-bottom:14px}.roles button{flex:1;padding:10px;border:1px solid #cdd5e1;background:#fff;border-radius:10px;cursor:pointer;font:inherit}
+.roles button.on{background:var(--soft);border-color:var(--blue2);color:var(--blue);font-weight:700}
+.err{outline:2px solid var(--red)!important;border-color:var(--red)!important}
+.tabs{display:flex;gap:6px;margin-bottom:14px}.tabs button{border:1px solid #cdd5e1;background:#fff;padding:8px 16px;border-radius:99px;cursor:pointer;font:inherit}.tabs button.on{background:var(--blue2);color:#fff;border-color:var(--blue2)}
+.mi{width:74px;padding:7px}
+@media(max-width:900px){
+ .app{grid-template-columns:1fr}.side{position:static;height:auto}.nav{display:flex;flex-wrap:wrap;gap:4px}.proto{display:none}
+ .g4{grid-template-columns:1fr 1fr}.g2,.g3,.e2{grid-template-columns:1fr}.login{grid-template-columns:1fr}.lbrand{padding:30px}.page{padding:14px}
+}
+@media print{.side,.top,.noprint{display:none!important}.app{display:block}.page{padding:0}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+/* ================== DATA ================== */
+const LBL=['A1','A2','A3','A4','A5','A6'];
+const MAXC=[4,6,12,3], CN=['Participation','Project Work','Terminal Performance','Behavioral Change'];
+const RAW=[
+ {id:1,roll:1,name:'Aarav Sharma',scores:[15,16,17,16,18,19],rub:[3.5,5,8.5,2],wt:[]},
+ {id:2,roll:2,name:'Sita Karki',scores:[18,17,16,14,13,11],rub:[2,3,5,1],wt:['Algebra','Linear Equations']},
+ {id:3,roll:3,name:'Bikash Thapa',scores:[12,14,11,13,12,12],rub:[2.5,3.5,5,1],wt:['Geometry']},
+ {id:4,roll:4,name:'Anisha Gurung',scores:[20,19,21,20,22,21],rub:[4,5.5,9.5,2],wt:[]},
+ {id:5,roll:5,name:'Rohan Adhikari',scores:[17,16,15,15,13,12],rub:[2,3,5.5,1.5],wt:['Algebra','Fractions']},
+ {id:6,roll:6,name:'Sunita Rai',scores:[10,9,11,12,14,16],rub:[3,4.5,6.5,2],wt:['Fractions']},
+ {id:7,roll:7,name:'Prabin Lama',scores:[19,18,17,17,16,14],rub:[2.5,3.5,6,2],wt:['Trigonometry','Algebra']},
+ {id:8,roll:8,name:'Mina Tamang',scores:[14,15,15,16,15,16],rub:[3,4,7.5,1.5],wt:[]}
+];
+let RES=[
+ {title:'Algebra Basics - Video Lesson',subject:'Mathematics',topic:'Algebra',type:'Video'},
+ {title:'Linear Equations Worksheet',subject:'Mathematics',topic:'Linear Equations',type:'PDF'},
+ {title:'Fractions Made Simple',subject:'Mathematics',topic:'Fractions',type:'Video'},
+ {title:'Fractions Practice Set',subject:'Mathematics',topic:'Fractions',type:'PDF'},
+ {title:'Geometry Shapes and Angles',subject:'Mathematics',topic:'Geometry',type:'Video'},
+ {title:'Trigonometry Intro Notes',subject:'Mathematics',topic:'Trigonometry',type:'PDF'},
+ {title:'Science: Force and Motion Guide',subject:'Science',topic:'Force',type:'Link'}
+];
+let IV=[
+ {id:1,sid:6,topic:'Fractions',type:'Peer tutoring',start:'2026-09-10',review:'2026-10-10',startIdx:3,status:'Completed',notes:'Paired with a stronger classmate twice a week.'},
+ {id:2,sid:3,topic:'Geometry',type:'Worksheet',start:'2026-09-10',review:'2026-10-10',startIdx:3,status:'Completed',notes:'Weekly geometry worksheets.'},
+ {id:3,sid:2,topic:'Algebra',type:'Extra class',start:'2026-10-20',review:'2026-11-20',startIdx:5,status:'Ongoing',notes:'After-school extra class, 2 days a week.'},
+ {id:4,sid:5,topic:'Fractions',type:'Parent meeting',start:'2026-10-22',review:'2026-11-22',startIdx:5,status:'Ongoing',notes:'Discussed study routine with parent.'}
+];
+const TEACHERS=[['Ramesh Poudel','Mathematics','9-A, 9-B'],['Kamala Bhandari','Science','9-A, 10-A'],['Suman Basnet','English','9-B, 10-A'],['Gita Neupane','Nepali','9-A, 10-B'],['Hari Subedi','Social Studies','10-A, 10-B']];
+const ACT=[['Intervention added for Sita Karki in Mathematics','2 days ago'],['Marks submitted for Grade 9-A, Assessment 6','4 days ago'],['Sunita Rai moved to Recovering status','1 week ago'],['New resource added: Fractions Practice Set','1 week ago']];
+
+/* ================== ANALYTICS (from proposal 4.5) ================== */
+const median=a=>{const s=[...a].sort((x,y)=>x-y),m=s.length>>1;return s.length%2?s[m]:(s[m-1]+s[m])/2};
+function theilSen(y){const sl=[];for(let i=0;i<y.length;i++)for(let j=i+1;j<y.length;j++)sl.push((y[j]-y[i])/(j-i));const b=median(sl);const c=median(y.map((v,i)=>v-b*i));return{b,c}}
+function ewma(y,a=0.3){const e=[y[0]];for(let t=1;t<y.length;t++)e.push(a*y[t]+(1-a)*e[t-1]);return e}
+const avg=a=>a.reduce((x,y)=>x+y,0)/a.length;
+function analyse(s){
+ const ts=theilSen(s.scores);s.slope=ts.b;s.icpt=ts.c;s.ew=ewma(s.scores);
+ s.base=ewma(s.scores.slice(0,-1)).slice(-1)[0];s.latest=s.scores[s.scores.length-1];
+ s.flag=s.slope<0&&s.latest<s.base;
+ s.trend=s.slope<-0.001?'Falling':s.slope>0.001?'Rising':'Steady';
+ s.trendLine=s.scores.map((_,i)=>s.icpt+s.slope*i);
+ return s}
+const ST=RAW.map(analyse);
+function recov(iv){const s=ST.find(x=>x.id===iv.sid);const pre=s.scores.slice(0,iv.startIdx),post=s.scores.slice(iv.startIdx);
+ if(post.length<2)return{s,pre:avg(pre),post:post.length?avg(post):null,delta:null,pending:true,n:post.length};
+ const a=avg(pre),b=avg(post);return{s,pre:a,post:b,delta:b-a,pending:false,n:post.length}}
+function status(s){if(s.flag)return'At-Risk';
+ if(IV.some(i=>i.sid===s.id&&i.status==='Completed'&&!recov(i).pending&&recov(i).delta>0))return'Recovering';return'Stable'}
+const bdg=st=>`<span class="badge ${st==='At-Risk'?'b-red':st==='Recovering'?'b-green':'b-gray'}">${st}</span>`;
+const f1=n=>n.toFixed(1), sg=n=>(n>0?'+':n<0?'\u2212':'')+Math.abs(n).toFixed(2);
+const trArrow=t=>t==='Falling'?'<span style="color:#dc2626">\u2198 Falling</span>':t==='Rising'?'<span style="color:#16a34a">\u2197 Rising</span>':'<span class="muted">\u2192 Steady</span>';
+
+/* ================== CHART HELPERS ================== */
+function lineChart(o){const w=o.w||640,h=o.h||260,p={l:36,r:14,t:16,b:28},n=o.labels.length;
+ const X=i=>p.l+i*(w-p.l-p.r)/(n-1),Y=v=>h-p.b-(v/25)*(h-p.t-p.b);
+ let s=`<svg viewBox="0 0 ${w} ${h}" class="chart" role="img">`;
+ [0,5,10,15,20,25].forEach(v=>s+=`<line x1="${p.l}" x2="${w-p.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="#e5e9f0"/><text x="${p.l-6}" y="${Y(v)+4}" text-anchor="end" class="ax">${v}</text>`);
+ o.labels.forEach((l,i)=>s+=`<text x="${X(i)}" y="${h-8}" text-anchor="middle" class="ax">${l}</text>`);
+ if(o.marker!=null){const mx=(X(o.marker-1)+X(o.marker))/2,r=mx>w*0.6;s+=`<line x1="${mx}" x2="${mx}" y1="${p.t}" y2="${h-p.b}" stroke="#d97706" stroke-dasharray="4 3" stroke-width="2"/><text x="${r?mx-5:mx+5}" y="${p.t+10}" text-anchor="${r?'end':'start'}" class="ax" fill="#d97706">Intervention starts</text>`}
+ o.series.forEach(se=>{s+=`<polyline points="${se.data.map((v,i)=>X(i)+','+Y(v)).join(' ')}" fill="none" stroke="${se.color}" stroke-width="${se.w||2.5}" ${se.dash?`stroke-dasharray="${se.dash}"`:''}/>`;
+  if(se.dots)se.data.forEach((v,i)=>s+=`<circle cx="${X(i)}" cy="${Y(v)}" r="4.5" fill="${se.color}"><title>${o.labels[i]}: ${f1(v)}</title></circle>`)});
+ return s+'</svg>'}
+const legend=a=>`<div class="legend">${a.map(([n,c,d])=>`<span><i style="border-color:${c};${d?'border-top-style:dashed':''}"></i>${n}</span>`).join('')}</div>`;
+function spark(d,c){const mn=Math.min(...d),mx=Math.max(...d),r=(mx-mn)||1;return`<svg width="72" height="24" viewBox="0 0 72 24"><polyline fill="none" stroke="${c}" stroke-width="2" points="${d.map((v,i)=>(i*14.2+1)+','+(21-(v-mn)/r*18)).join(' ')}"/></svg>`}
+function prePost(a,b){const w=300,h=200,Y=v=>170-(v/25)*150;
+ return`<svg viewBox="0 0 ${w} ${h}" class="chart"><line x1="20" x2="${w-10}" y1="170" y2="170" stroke="#cbd5e1"/>
+ <rect x="60" y="${Y(a)}" width="70" height="${170-Y(a)}" rx="6" fill="#94a3b8"/><text x="95" y="${Y(a)-6}" text-anchor="middle" font-weight="700">${f1(a)}</text><text x="95" y="188" text-anchor="middle" class="ax">Before</text>
+ <rect x="170" y="${Y(b)}" width="70" height="${170-Y(b)}" rx="6" fill="#0d9488"/><text x="205" y="${Y(b)-6}" text-anchor="middle" font-weight="700">${f1(b)}</text><text x="205" y="188" text-anchor="middle" class="ax">After</text></svg>`}
+
+/* ================== UI HELPERS ================== */
+const $=s=>document.querySelector(s);
+function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),3200)}
+function modal(html){const m=document.createElement('div');m.className='modalbg';m.onclick=e=>{if(e.target===m)m.remove()};m.innerHTML=`<div class="modal">${html}<div style="text-align:right;margin-top:14px"><button class="btn sec" onclick="this.closest('.modalbg').remove()">Close</button></div></div>`;document.body.appendChild(m)}
+const go=p=>{location.hash='#'+p};
+const sel=(id,opts,v)=>`<select id="${id}">${opts.map(o=>`<option ${o===v?'selected':''}>${o}</option>`).join('')}</select>`;
+const CTX=`<div class="row" style="margin-bottom:16px"><div><label>Class</label>${sel('c1',['Grade 9-A','Grade 9-B','Grade 10-A'])}</div><div><label>Subject</label>${sel('c2',['Mathematics','Science','English','Nepali','Social Studies'])}</div></div>`;
+let USER={role:null,name:''},PRE=null,SELIV=null,FILT={q:'',st:'All'};
+
+/* ================== LAYOUT ================== */
+const NAV_T=[['/dashboard','\u{1F3E0}','Dashboard'],['/students','\u{1F465}','Students'],['/marks','\u{1F4DD}','Enter Marks'],['/alerts','\u{1F6A8}','At-Risk Alerts'],['/interventions','\u{1F9E9}','Interventions'],['/recovery','\u{1F4C8}','Recovery Tracking'],['/reports','\u{1F4C4}','Reports']];
+const NAV_A=[['/admin','\u{1F3E0}','Admin Dashboard'],['/admin/users','\u{1F465}','Teachers & Students'],['/admin/classes','\u{1F3EB}','Classes & Subjects'],['/admin/criteria','\u{1F4D0}','Assessment Criteria'],['/admin/resources','\u{1F4DA}','Learning Resources']];
+function shell(path,body){const nav=USER.role==='Admin'?NAV_A:NAV_T;
+ return`<div class="app"><aside class="side"><div class="brand">CAS<span>.</span></div><div class="tag">Continuous Assessment &amp; Student Support</div>
+ <nav class="nav">${nav.map(([p,i,l])=>`<a class="${path===p||(p!=='/admin'&&path.startsWith(p+'/'))?'on':''}" onclick="go('${p}')"><span>${i}</span>${l}</a>`).join('')}<a onclick="logout()"><span>\u{1F6AA}</span>Logout</a></nav>
+ <div class="proto">PROTOTYPE \u2013 sample data only<br>Dipshikha Ghimire (034979-23)<br>KU ITEX 499</div></aside>
+ <div class="main"><div class="top"><div><b>Shree Sample Secondary School</b> <span class="muted small">\u00b7 Kathmandu</span></div><div class="who"><span class="muted small">${USER.role}</span><div class="av">${USER.name[0]||'T'}</div><b>${USER.name}</b></div></div>
+ <div class="page">${body}</div></div></div>`}
+function logout(){USER={role:null,name:''};go('/login')}
+
+/* ================== VIEWS ================== */
+function vLogin(){return`<div class="login"><div class="lbrand"><h1>Continuous Assessment<br>&amp; Student Support</h1><p style="color:#c7d4ff;max-width:420px">A simple decision-support tool for Grade 9-10 teachers, built around the CDC 25-mark internal assessment.</p><ul><li>\u2713 Track progress over time</li><li>\u2713 Spot risk early, without false alarms</li><li>\u2713 Support every student, then measure recovery</li></ul></div>
+ <div class="lform"><div class="lcard"><h1>Welcome back</h1><p class="muted">Sign in to continue</p>
+ <div class="roles"><button id="rT" class="on" onclick="pickRole('Teacher')">Teacher</button><button id="rA" onclick="pickRole('Admin')">Admin</button></div>
+ <label>Username</label><input id="u" value="ramesh.poudel" style="margin-bottom:12px"><label>Password</label>
+ <div style="position:relative;margin-bottom:8px"><input id="pw" type="password" value="password123"><a class="small" style="position:absolute;right:10px;top:11px;cursor:pointer;color:var(--blue2)" onclick="const e=$('#pw');e.type=e.type==='password'?'text':'password'">show/hide</a></div>
+ <div class="small" style="margin-bottom:16px"><a style="color:var(--blue2);cursor:pointer" onclick="toast('Password reset is not part of this prototype')">Forgot password?</a></div>
+ <button class="btn" style="width:100%" onclick="doLogin()">Login</button><p class="muted small" style="margin-top:14px">Prototype: any username and password works.</p></div></div></div>`}
+let ROLE='Teacher';
+function pickRole(r){ROLE=r;$('#rT').className=r==='Teacher'?'on':'';$('#rA').className=r==='Admin'?'on':'';$('#u').value=r==='Admin'?'admin':'ramesh.poudel'}
+function doLogin(){USER={role:ROLE,name:ROLE==='Admin'?'Admin User':'Ramesh Poudel'};go(ROLE==='Admin'?'/admin':'/dashboard')}
+
+function vDash(){
+ const risk=ST.filter(s=>s.flag),act=IV.filter(i=>i.status==='Ongoing').length,rec=IV.filter(i=>i.status==='Completed'&&!recov(i).pending&&recov(i).delta>0).length;
+ const cavg=LBL.map((_,i)=>avg(ST.map(s=>s.scores[i])));
+ const comp=CN.map((n,c)=>({n,p:avg(ST.map(s=>s.rub[c]))/MAXC[c]*100}));
+ return`<div class="pagehead"><div><h1>Teacher Dashboard</h1><div class="muted">Overview of continuous assessment for your class</div></div></div>${CTX}
+ <div class="grid g4" style="margin-bottom:16px">
+ <div class="card stat blue"><div class="n">${ST.length}</div><div class="l">Total Students</div></div>
+ <div class="card stat red"><div class="n">${risk.length}</div><div class="l">At-Risk Students</div></div>
+ <div class="card stat amber"><div class="n">${act}</div><div class="l">Active Interventions</div></div>
+ <div class="card stat green"><div class="n">${rec}</div><div class="l">Recovered This Term</div></div></div>
+ <div class="grid g2" style="margin-bottom:16px"><div class="card"><h2>Students Needing Attention</h2><div class="tw"><table><tr><th>Student</th><th>Latest /25</th><th>Trend</th><th>Status</th><th></th></tr>
+ ${risk.map(s=>`<tr class="click" onclick="go('/student/${s.id}')"><td><b>${s.name}</b><div class="muted small">Mathematics</div></td><td>${s.latest}</td><td>${trArrow(s.trend)}</td><td>${bdg('At-Risk')}</td><td><button class="btn sm sec">View</button></td></tr>`).join('')}</table></div></div>
+ <div class="card"><h2>Recent Activity</h2><div class="tl">${ACT.map(a=>`<div>${a[0]}<div class="muted small">${a[1]}</div></div>`).join('')}</div></div></div>
+ <div class="grid e2"><div class="card"><h2>Class Average Over Assessments</h2>${lineChart({labels:LBL,series:[{data:cavg,color:'#2548b8',dots:true}]})}<div class="muted small">Average score out of 25</div></div>
+ <div class="card"><h2>CDC Component Averages</h2><div class="muted small" style="margin-bottom:10px">Class average as % of each component's maximum</div>
+ ${comp.map((c,i)=>`<div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between"><span>${c.n} <span class="muted small">(max ${MAXC[i]})</span></span><b>${Math.round(c.p)}%</b></div><div class="bar"><i style="width:${c.p}%;background:${c.p<55?'#d97706':'#0d9488'}"></i></div></div>`).join('')}</div></div>`}
+
+function rowsStu(){const q=FILT.q.toLowerCase();return ST.filter(s=>s.name.toLowerCase().includes(q)&&(FILT.st==='All'||status(s)===FILT.st)).map(s=>`<tr class="click" onclick="go('/student/${s.id}')"><td>${s.roll}</td><td><b>${s.name}</b></td><td>9-A</td><td>${s.latest} / 25</td><td>${trArrow(s.trend)} ${spark(s.scores,s.flag?'#dc2626':'#0d9488')}</td><td>${bdg(status(s))}</td></tr>`).join('')||'<tr><td colspan="6" class="muted" style="text-align:center;padding:30px">No students match your filters.</td></tr>'}
+function updStu(){FILT.q=$('#q').value;FILT.st=$('#fs').value;$('#rows').innerHTML=rowsStu()}
+function vStudents(){return`<div class="pagehead"><div><h1>Students</h1><div class="muted">Click a student to see their learning trajectory</div></div><div><button class="btn sec" onclick="toast('Import from CSV is planned for the full system')">Import CSV</button> <button class="btn" onclick="addStudent()">+ Add Student</button></div></div>
+ <div class="card"><div class="row" style="margin-bottom:12px"><div style="flex:2"><label>Search</label><input id="q" placeholder="Search by name" value="${FILT.q}" oninput="updStu()"></div><div><label>Grade</label><select><option>Grade 9</option><option>Grade 10</option></select></div><div><label>Status</label><select id="fs" onchange="updStu()">${['All','At-Risk','Recovering','Stable'].map(o=>`<option ${o===FILT.st?'selected':''}>${o}</option>`).join('')}</select></div></div>
+ <div class="tw"><table><tr><th>Roll</th><th>Name</th><th>Section</th><th>Current Total</th><th>Trend</th><th>Status</th></tr><tbody id="rows">${rowsStu()}</tbody></table></div><div class="muted small" style="margin-top:10px">Showing ${ST.length} students \u00b7 Page 1 of 1</div></div>`}
+function addStudent(){modal(`<h2>Add Student</h2><div class="row"><div><label>Full name</label><input placeholder="e.g. Nabin Shrestha"></div><div><label>Roll no.</label><input type="number" placeholder="9"></div></div><div class="row" style="margin-top:10px"><div><label>Grade</label><select><option>9</option><option>10</option></select></div><div><label>Section</label><select><option>A</option><option>B</option></select></div></div><div style="margin-top:14px"><button class="btn" onclick="this.closest('.modalbg').remove();toast('Student saved (demo)')">Save Student</button></div>`)}
+
+function vStudent(id){const s=ST.find(x=>x.id==id);if(!s)return'<div class="card">Student not found</div>';
+ const st=status(s),ivs=IV.filter(i=>i.sid===s.id);
+ return`<div class="muted small" style="margin-bottom:8px"><a style="cursor:pointer;color:var(--blue2)" onclick="go('/students')">\u2190 Back to Students</a></div>
+ <div class="pagehead"><div><h1>${s.name} ${bdg(st)}</h1><div class="muted">Roll ${s.roll} \u00b7 Grade 9-A \u00b7 Mathematics</div></div><div><button class="btn sec" onclick="sugRes(${s.id})">Suggest Resources</button> <button class="btn teal" onclick="PRE=${s.id};go('/interventions')">+ Add Intervention</button></div></div>
+ ${s.flag?`<div class="warn" style="margin-bottom:16px"><b>Why flagged?</b> The student's marks are trending downward (${sg(s.slope)} per assessment) <b>AND</b> the latest score (${s.latest}/25) is below their recent average (${f1(s.base)}/25). Both conditions are true, so the system raised a warning. The final decision stays with you.</div>`:`<div class="note" style="margin-bottom:16px"><b>Not flagged.</b> ${s.slope<0?'Marks are falling slightly, but the latest score is not below the recent average, so no alarm is raised.':'The trend is not falling, so no warning is needed.'}</div>`}
+ <div class="grid g3" style="margin-bottom:16px"><div class="card stat ${s.slope<0?'red':'green'}"><div class="n">${sg(s.slope)}</div><div class="l">Learning trend per assessment (${s.trend})</div></div>
+ <div class="card stat blue"><div class="n">${f1(s.base)}</div><div class="l">Recent average (EWMA baseline)</div></div>
+ <div class="card stat ${s.latest<s.base?'amber':'green'}"><div class="n">${s.latest}</div><div class="l">Latest score out of 25</div></div></div>
+ <div class="grid g2" style="margin-bottom:16px"><div class="card"><h2>Marks Over Assessments</h2>${lineChart({labels:LBL,series:[{data:s.trendLine,color:'#d97706',dash:'6 4',w:2},{data:s.ew,color:'#0d9488',dash:'2 4',w:2.5},{data:s.scores,color:'#2548b8',dots:true}]})}
+ ${legend([['Actual marks','#2548b8'],['EWMA (recent average)','#0d9488',1],['Trend line (Theil-Sen)','#d97706',1]])}</div>
+ <div class="card"><h2>CDC Rubric (latest)</h2>${CN.map((n,i)=>`<div style="margin-bottom:13px"><div style="display:flex;justify-content:space-between"><span>${n}</span><b>${s.rub[i]} / ${MAXC[i]}</b></div><div class="bar"><i style="width:${s.rub[i]/MAXC[i]*100}%"></i></div></div>`).join('')}
+ <h3 style="margin-top:18px">Weak Topics</h3>${s.wt.length?s.wt.map(t=>`<span class="chip">${t}</span>`).join(''):'<span class="muted small">None identified</span>'}</div></div>
+ <div class="card"><h2>Intervention History</h2>${ivs.length?`<div class="tl">${ivs.map(i=>`<div><b>${i.type}</b> on ${i.topic} <span class="badge ${i.status==='Completed'?'b-green':'b-amber'}">${i.status}</span><div class="muted small">Started ${i.start} \u00b7 ${i.notes}</div></div>`).join('')}</div>`:'<div class="muted">No interventions yet.</div>'}</div>`}
+function sugRes(id){const s=ST.find(x=>x.id===id);const r=RES.filter(x=>s.wt.includes(x.topic));modal(`<h2>Suggested resources for ${s.name}</h2>${r.length?r.map(x=>`<div style="padding:10px 0;border-bottom:1px solid var(--line)"><b>${x.title}</b><div class="muted small">${x.topic} \u00b7 ${x.type}</div></div>`).join(''):'<p class="muted">No weak topics, so no resources are needed.</p>'}`)}
+
+function vMarks(){const dis=ST.map((s,i)=>`<tr><td>${s.roll}</td><td><b>${s.name}</b></td>${s.rub.map((v,c)=>`<td><input class="mi" type="number" step="0.5" min="0" value="${v}" data-c="${c}" data-r="${i}" oninput="calcRow(${i})"><span class="muted small"> /${MAXC[c]}</span></td>`).join('')}<td><b id="t${i}">${s.latest}</b> / 25</td></tr>`).join('');
+ return`<div class="pagehead"><div><h1>Enter Marks</h1><div class="muted">CDC 25-mark internal assessment</div></div></div>
+ <div class="card"><div class="row" style="margin-bottom:14px"><div><label>Grade</label>${sel('m1',['Grade 9','Grade 10'])}</div><div><label>Section</label>${sel('m2',['A','B'])}</div><div><label>Subject</label>${sel('m3',['Mathematics','Science','English'])}</div><div><label>Assessment</label><input value="Assessment 7 - Unit Test"></div><div><label>Date</label><input type="date" value="2026-10-28"></div></div>
+ <div class="tw"><table><tr><th>Roll</th><th>Student</th><th>Participation</th><th>Project Work</th><th>Terminal</th><th>Behavior</th><th>Total</th></tr>${dis}</table></div>
+ <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap"><button class="btn sec" onclick="toast('Draft saved')">Save Draft</button><button class="btn" onclick="submitMarks()">Submit Marks</button></div>
+ <div class="note" style="margin-top:14px">Values above the maximum turn red. After submitting, trend analysis updates automatically.</div></div>`}
+function calcRow(i){let t=0;document.querySelectorAll(`input[data-r="${i}"]`).forEach(e=>{const m=MAXC[e.dataset.c],v=parseFloat(e.value)||0;e.classList.toggle('err',v>m||v<0);t+=v});$('#t'+i).textContent=t}
+function submitMarks(){if(document.querySelector('.err'))return toast('Please fix the red values first.');toast('Marks submitted for 8 students. Trend analysis updated.')}
+
+function vAlerts(){const r=ST.filter(s=>s.flag).sort((a,b)=>a.slope-b.slope);
+ return`<div class="pagehead"><div><h1>At-Risk Alerts</h1><div class="muted">Sorted by how fast marks are falling</div></div></div>
+ <div class="note" style="margin-bottom:16px">A student is flagged only when <b>both</b> conditions are true, to avoid false alarms from a single bad test. The final decision is always yours.</div>${CTX}
+ <div class="grid e2">${r.map(s=>`<div class="card"><div style="display:flex;justify-content:space-between;gap:8px"><div><h2 style="margin:0">${s.name}</h2><div class="muted small">Mathematics \u00b7 Grade 9-A</div></div>${bdg('At-Risk')}</div>
+ ${lineChart({labels:LBL,h:170,w:420,series:[{data:s.ew,color:'#0d9488',dash:'2 4',w:2},{data:s.scores,color:'#dc2626',dots:true}]})}
+ <div style="margin:6px 0 10px"><div>\u2714 Marks falling (${sg(s.slope)} per assessment)</div><div>\u2714 Latest ${s.latest} is below recent average ${f1(s.base)}</div></div>
+ <div>${s.wt.map(t=>`<span class="chip">${t}</span>`).join('')}</div>
+ <div style="display:flex;gap:8px;margin-top:8px"><button class="btn sm teal" onclick="PRE=${s.id};go('/interventions')">Create Intervention</button><button class="btn sm sec" onclick="go('/student/${s.id}')">View Profile</button></div></div>`).join('')}</div>`}
+
+function ivRows(){return IV.map(i=>{const r=recov(i);return`<tr class="click" onclick="SELIV=${i.id};go('/recovery')"><td><b>${r.s.name}</b></td><td>${i.topic}</td><td>${i.type}</td><td>${i.start}</td><td><span class="badge ${i.status==='Completed'?'b-green':'b-amber'}">${i.status}</span></td><td>${recBadge(r)}</td></tr>`}).join('')}
+const recBadge=r=>r.pending?'<span class="badge b-gray">Pending</span>':r.delta>0?'<span class="badge b-green">Positive Recovery</span>':'<span class="badge b-amber">Unsustained</span>';
+function vInterv(){const pid=PRE;PRE=null;
+ const rs=RES.map((x,i)=>`<label style="font-weight:400;display:flex;gap:8px;align-items:center;margin-bottom:6px"><input type="checkbox" style="width:auto"> ${x.title} <span class="muted small">(${x.topic}, ${x.type})</span></label>`).join('');
+ return`<div class="pagehead"><div><h1>Interventions</h1><div class="muted">Plan support, link resources, then track recovery</div></div></div>
+ <div class="grid g2"><div class="card"><h2>New Intervention</h2><div class="row"><div><label>Student</label><select id="iS">${ST.map(s=>`<option value="${s.id}" ${s.id===pid?'selected':''}>${s.name}${s.flag?' (At-Risk)':''}</option>`).join('')}</select></div><div><label>Weak topic</label>${sel('iT',['Algebra','Linear Equations','Fractions','Geometry','Trigonometry'])}</div></div>
+ <div class="row" style="margin-top:10px"><div><label>Type</label>${sel('iY',['Extra class','Worksheet','Peer tutoring','Parent meeting'])}</div><div><label>Start date</label><input type="date" id="iD" value="2026-10-28"></div><div><label>Review date</label><input type="date" value="2026-11-28"></div></div>
+ <div style="margin-top:12px"><label>Recommended resources</label>${rs}</div><div><label>Teacher notes</label><textarea id="iN" rows="3" placeholder="What will you do and why?"></textarea></div>
+ <div style="margin-top:12px"><button class="btn" onclick="saveIv()">Save Intervention</button></div></div>
+ <div class="card"><h2>How recovery is measured</h2><p class="small">When an intervention starts, the system stores the <b>pre-intervention average (S<sub>pre</sub>)</b>. After at least two new assessments it computes the <b>post average (S<sub>post</sub>)</b>.</p><p class="small"><b>\u0394R = S<sub>post</sub> \u2212 S<sub>pre</sub></b></p><p class="small">\u0394R &gt; 0 \u2192 Positive Recovery<br>\u0394R \u2264 0 \u2192 Unsustained (try other support)</p></div></div>
+ <div class="card" style="margin-top:16px"><h2>All Interventions</h2><div class="tw"><table><tr><th>Student</th><th>Topic</th><th>Type</th><th>Start</th><th>Status</th><th>Recovery</th></tr><tbody id="ivb">${ivRows()}</tbody></table></div></div>`}
+function saveIv(){const id=+$('#iS').value;IV.push({id:IV.length+1,sid:id,topic:$('#iT').value,type:$('#iY').value,start:$('#iD').value,review:'',startIdx:6,status:'Ongoing',notes:$('#iN').value||'-'});$('#ivb').innerHTML=ivRows();toast('Intervention saved')}
+
+function vRecovery(){if(!SELIV)SELIV=IV[0].id;const iv=IV.find(i=>i.id===SELIV),r=recov(iv);
+ return`<div class="pagehead"><div><h1>Recovery Tracking</h1><div class="muted">Did the intervention work?</div></div><button class="btn sec noprint" onclick="toast('Export is planned for the full system')">Export report</button></div>
+ <div class="tabs">${IV.map(i=>`<button class="${i.id===SELIV?'on':''}" onclick="SELIV=${i.id};render()">${ST.find(s=>s.id===i.sid).name.split(' ')[0]} \u00b7 ${i.topic}</button>`).join('')}</div>
+ <div class="grid e2"><div class="card"><h2>${r.s.name} \u2013 ${iv.topic} (${iv.type})</h2>
+ ${r.pending?`<div class="note">Only ${r.n} assessment(s) since the intervention began. At least 2 are needed to calculate recovery. Pre-intervention average: <b>${f1(r.pre)}/25</b>.</div>`:`${prePost(r.pre,r.post)}<div style="text-align:center"><div class="muted small">Recovery Delta (\u0394R)</div><div class="big" style="color:${r.delta>0?'#16a34a':'#d97706'}">${r.delta>0?'+':''}${f1(r.delta)}</div></div>
+ <div class="${r.delta>0?'note':'warn'}" style="margin-top:10px">${r.delta>0?'<b>Positive Recovery</b> \u2013 the intervention worked.':'<b>Unsustained</b> \u2013 consider additional support or different materials.'}</div>`}</div>
+ <div class="card"><h2>Marks with intervention marker</h2>${lineChart({labels:LBL,marker:iv.startIdx,series:[{data:r.s.scores,color:'#2548b8',dots:true}]})}<div class="muted small">Dashed line = when the intervention started.</div></div></div>
+ <div class="card" style="margin-top:16px"><h2>All students with interventions</h2><div class="tw"><table><tr><th>Student</th><th>Topic</th><th>Before</th><th>After</th><th>\u0394R</th><th>Result</th></tr>${IV.map(i=>{const x=recov(i);return`<tr><td>${x.s.name}</td><td>${i.topic}</td><td>${f1(x.pre)}</td><td>${x.post==null?'-':f1(x.post)}</td><td>${x.delta==null?'-':(x.delta>0?'+':'')+f1(x.delta)}</td><td>${recBadge(x)}</td></tr>`}).join('')}</table></div></div>`}
+
+function vReports(){const risk=ST.filter(s=>s.flag).length;
+ return`<div class="pagehead"><div><h1>Reports</h1><div class="muted">Class summary for Grade 9-A \u00b7 Mathematics \u00b7 Term 2</div></div><button class="btn noprint" onclick="window.print()">Print / Save as PDF</button></div>
+ <div class="grid g3" style="margin-bottom:16px"><div class="card stat blue"><div class="n">${f1(avg(ST.map(s=>s.latest)))}</div><div class="l">Class average (latest, /25)</div></div><div class="card stat red"><div class="n">${risk}</div><div class="l">At-risk students</div></div><div class="card stat green"><div class="n">${IV.filter(i=>i.status==='Completed'&&!recov(i).pending&&recov(i).delta>0).length}</div><div class="l">Recovered after intervention</div></div></div>
+ <div class="card"><h2>Student Summary</h2><div class="tw"><table><tr><th>Student</th><th>A1-A6</th><th>Trend slope</th><th>EWMA baseline</th><th>Latest</th><th>Status</th></tr>${ST.map(s=>`<tr><td>${s.name}</td><td>${s.scores.join(', ')}</td><td>${sg(s.slope)}</td><td>${f1(s.base)}</td><td>${s.latest}</td><td>${bdg(status(s))}</td></tr>`).join('')}</table></div></div>`}
+
+/* ----- Admin ----- */
+function vAdmin(){return`<div class="pagehead"><div><h1>Admin Dashboard</h1><div class="muted">System overview</div></div></div>
+ <div class="grid g4" style="margin-bottom:16px"><div class="card stat blue"><div class="n">12</div><div class="l">Teachers</div></div><div class="card stat blue"><div class="n">420</div><div class="l">Students</div></div><div class="card stat blue"><div class="n">8</div><div class="l">Subjects</div></div><div class="card stat blue"><div class="n">${RES.length}</div><div class="l">Learning resources</div></div></div>
+ <div class="card"><h2>Recent Activity Log</h2><div class="tl">${ACT.map(a=>`<div>${a[0]}<div class="muted small">${a[1]}</div></div>`).join('')}</div></div>`}
+let UTAB='Teachers';
+function vUsers(){const t=UTAB==='Teachers';
+ return`<div class="pagehead"><div><h1>Teachers &amp; Students</h1><div class="muted">Add, edit and assign</div></div><button class="btn" onclick="${t?'addTeacher()':'addStudent()'}">+ Add ${t?'Teacher':'Student'}</button></div>
+ <div class="tabs"><button class="${t?'on':''}" onclick="UTAB='Teachers';render()">Teachers</button><button class="${!t?'on':''}" onclick="UTAB='Students';render()">Students</button></div>
+ <div class="card"><div class="tw"><table>${t?`<tr><th>Name</th><th>Subject</th><th>Classes</th><th></th></tr>${TEACHERS.map(x=>`<tr><td><b>${x[0]}</b></td><td>${x[1]}</td><td>${x[2]}</td><td><button class="btn sm sec" onclick="toast('Edit form (demo)')">Edit</button> <button class="btn sm sec" onclick="toast('Delete asks for confirmation (demo)')">Delete</button></td></tr>`).join('')}`:`<tr><th>Roll</th><th>Name</th><th>Class</th><th></th></tr>${ST.map(s=>`<tr><td>${s.roll}</td><td><b>${s.name}</b></td><td>Grade 9-A</td><td><button class="btn sm sec" onclick="toast('Edit form (demo)')">Edit</button> <button class="btn sm sec" onclick="toast('Delete asks for confirmation (demo)')">Delete</button></td></tr>`).join('')}`}</table></div></div>`}
+function addTeacher(){modal(`<h2>Add Teacher</h2><div class="row"><div><label>Full name</label><input></div><div><label>Subject</label>${sel('x1',['Mathematics','Science','English','Nepali','Social Studies'])}</div></div><div style="margin-top:10px"><label>Assign classes</label><input placeholder="e.g. 9-A, 10-B"></div><div style="margin-top:14px"><button class="btn" onclick="this.closest('.modalbg').remove();toast('Teacher saved (demo)')">Save Teacher</button></div>`)}
+function vClasses(){return`<div class="pagehead"><div><h1>Classes &amp; Subjects</h1></div></div><div class="card"><div class="tw"><table><tr><th>Class</th><th>Subject</th><th>Teacher</th><th>Students</th></tr>${[['Grade 9-A','Mathematics','Ramesh Poudel',8],['Grade 9-A','Science','Kamala Bhandari',8],['Grade 9-B','English','Suman Basnet',35],['Grade 10-A','Nepali','Gita Neupane',32],['Grade 10-B','Social Studies','Hari Subedi',30]].map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join('')}</table></div></div>`}
+function vCriteria(){return`<div class="pagehead"><div><h1>Assessment Criteria</h1><div class="muted">CDC internal assessment rubric (25 marks)</div></div></div><div class="card"><div class="tw"><table><tr><th>Component</th><th>Max marks</th><th>Description</th></tr>
+ ${[['Participation',4,'Class engagement and attendance'],['Project Work',6,'Practical or project-based tasks'],['Terminal Performance',12,'Unit and terminal test results'],['Behavioral Change',3,'Observed improvement in conduct and attitude']].map(r=>`<tr><td><b>${r[0]}</b></td><td><input class="mi" value="${r[1]}" disabled></td><td>${r[2]}</td></tr>`).join('')}<tr><td><b>Total</b></td><td><b>25</b></td><td class="muted">Fixed by the Curriculum Development Centre</td></tr></table></div>
+ <div class="note" style="margin-top:14px"><b>Analytics settings:</b> EWMA smoothing factor \u03b1 = 0.3 \u00b7 Slope method = Theil-Sen \u00b7 Flag rule = slope &lt; 0 AND latest &lt; EWMA baseline</div></div>`}
+function vRes(){return`<div class="pagehead"><div><h1>Learning Resources</h1></div></div><div class="grid g2"><div class="card"><div class="tw"><table><tr><th>Title</th><th>Subject</th><th>Topic</th><th>Type</th></tr><tbody id="rb">${resRows()}</tbody></table></div></div>
+ <div class="card"><h2>Add Resource</h2><label>Title</label><input id="rt" style="margin-bottom:10px"><label>Subject</label>${sel('rs',['Mathematics','Science','English'])}<div style="height:10px"></div><label>Topic</label><input id="rp" style="margin-bottom:10px"><label>Type</label>${sel('ry',['Video','PDF','Link'])}<div style="height:10px"></div><label>Link / URL</label><input placeholder="https://" style="margin-bottom:12px"><button class="btn" onclick="addRes()">Add Resource</button></div></div>`}
+const resRows=()=>RES.map(r=>`<tr><td><b>${r.title}</b></td><td>${r.subject}</td><td>${r.topic}</td><td><span class="badge b-blue">${r.type}</span></td></tr>`).join('');
+function addRes(){const t=$('#rt').value.trim();if(!t)return toast('Please enter a title');RES.push({title:t,subject:$('#rs').value,topic:$('#rp').value||'-',type:$('#ry').value});$('#rb').innerHTML=resRows();$('#rt').value='';toast('Resource added')}
+
+/* ================== ROUTER ================== */
+function render(){const path=(location.hash||'#/login').slice(1)||'/login';const root=$('#root');
+ if(path==='/login'||!USER.role){if(path!=='/login'){location.hash='#/login';return}root.innerHTML=vLogin();return}
+ let b;const [,a,id]=path.split('/');
+ if(path==='/dashboard')b=vDash();else if(path==='/students')b=vStudents();else if(a==='student')b=vStudent(id);
+ else if(path==='/marks')b=vMarks();else if(path==='/alerts')b=vAlerts();else if(path==='/interventions')b=vInterv();
+ else if(path==='/recovery')b=vRecovery();else if(path==='/reports')b=vReports();
+ else if(path==='/admin')b=vAdmin();else if(path==='/admin/users')b=vUsers();else if(path==='/admin/classes')b=vClasses();
+ else if(path==='/admin/criteria')b=vCriteria();else if(path==='/admin/resources')b=vRes();else b='<div class="card">Page not found</div>';
+ root.innerHTML=shell(a==='student'?'/students':path,b);window.scrollTo(0,0)}
+window.addEventListener('hashchange',render);render();
+</script>
+</body>
+</html>
