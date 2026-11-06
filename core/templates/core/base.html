@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}CAS{% endblock %}</title>
+<style>
+  :root { --blue:#1e3a8a; --blue2:#2548b8; --red:#dc2626; --amber:#d97706; --green:#16a34a; --gray:#6b7280;
+          --bg:#f4f6fa; --line:#e5e9f0; --text:#1f2937; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:"Segoe UI",system-ui,Arial,sans-serif; background:var(--bg); color:var(--text); line-height:1.45; }
+  header { background:var(--blue); color:#fff; padding:12px 24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; }
+  header b { font-size:18px; } header small { color:#b9c6ee; display:block; font-size:12px; }
+  header form { display:inline; } header button { background:#fff; color:var(--blue); border:0; border-radius:8px; padding:6px 14px; font-weight:600; cursor:pointer; }
+  main { padding:24px; max-width:1100px; margin:0 auto; }
+  h1 { font-size:22px; margin:0 0 4px; } h2 { font-size:17px; margin:0 0 12px; }
+  .muted { color:var(--gray); font-size:14px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:14px; padding:18px; margin-bottom:16px; }
+  .cards { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:16px; }
+  .cards .card { margin:0; } .n { font-size:30px; font-weight:700; line-height:1.1; } .l { color:var(--gray); font-size:13px; }
+  .red { color:var(--red); } .amber { color:var(--amber); } .green { color:var(--green); } .gray { color:var(--gray); }
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  th { text-align:left; color:var(--gray); font-size:12.5px; padding:8px 10px; border-bottom:1px solid var(--line); }
+  td { padding:10px; border-bottom:1px solid #f0f2f6; vertical-align:top; }
+  .badge { display:inline-block; padding:3px 10px; border-radius:99px; font-size:12px; font-weight:600; white-space:nowrap; }
+  .b-red { background:#fee2e2; color:#b91c1c; } .b-amber { background:#fef3c7; color:#92400e; }
+  .b-green { background:#dcfce7; color:#166534; } .b-gray { background:#eceff3; color:#4b5563; }
+  .filters { display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; margin-bottom:16px; }
+  label { font-size:13px; font-weight:600; display:block; margin-bottom:4px; }
+  select, input { font:inherit; padding:8px 10px; border:1px solid #cdd5e1; border-radius:8px; background:#fff; }
+  .btn { background:var(--blue2); color:#fff; border:0; border-radius:8px; padding:9px 16px; font-weight:600; cursor:pointer; }
+  .note { background:#eef6ff; border:1px solid #cfe2ff; border-radius:12px; padding:12px 14px; font-size:14px; margin-bottom:16px; }
+  .tw { overflow-x:auto; }
+  @media (max-width:800px) { .cards { grid-template-columns:1fr 1fr; } main { padding:14px; } }
+</style>
+</head>
+<body>
+<header>
+  <div><b>CAS</b><small>Continuous Assessment &amp; Student Support</small></div>
+  {% if user.is_authenticated %}
+  <div>{{ user.get_username }}
+    <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button type="submit">Log out</button></form>
+  </div>
+  {% endif %}
+</header>
+<main>{% block content %}{% endblock %}</main>
+</body>
+</html>

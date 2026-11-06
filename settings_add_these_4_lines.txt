@@ -1,0 +1,7 @@
+Open config/settings.py, press Ctrl+End to go to the bottom,
+press Enter for a blank line, and paste these 4 lines:
+
+# Login settings (CAS)
+LOGIN_URL = "/accounts/login/"
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/accounts/login/"
